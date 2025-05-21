@@ -7,6 +7,7 @@ export type ChatMessage = {
   isUser: boolean;
   timestamp: Date;
   images?: string[];
+  bookmarked?: boolean;
 };
 
 export type Chat = {
@@ -26,10 +27,12 @@ type ChatContextType = {
   setCurrentChat: (id: string) => void;
   addMessage: (content: string, isUser: boolean, images?: string[]) => void;
   bookmarkChat: (chatId: string) => void;
+  bookmarkMessage: (messageId: string) => void;
   deleteChat: (chatId: string) => void;
   renameChat: (chatId: string, newTitle: string) => void;
   toggleDarkMode: () => void;
   getCurrentChat: () => Chat | undefined;
+  getBookmarkedMessages: () => ChatMessage[];
 };
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -133,6 +136,7 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
       isUser,
       timestamp: new Date(),
       images,
+      bookmarked: false,
     };
 
     setChats((prevChats) => {
@@ -164,6 +168,19 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
     );
   };
 
+  const bookmarkMessage = (messageId: string) => {
+    setChats((prevChats) =>
+      prevChats.map((chat) => ({
+        ...chat,
+        messages: chat.messages.map((message) =>
+          message.id === messageId
+            ? { ...message, bookmarked: !message.bookmarked }
+            : message
+        ),
+      }))
+    );
+  };
+
   const deleteChat = (chatId: string) => {
     setChats((prevChats) => prevChats.filter((chat) => chat.id !== chatId));
     
@@ -189,6 +206,25 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
     return chats.find((chat) => chat.id === currentChatId);
   };
 
+  const getBookmarkedMessages = () => {
+    const bookmarkedMessages: ChatMessage[] = [];
+    
+    chats.forEach((chat) => {
+      chat.messages.forEach((message) => {
+        if (message.bookmarked && message.isUser) {
+          // Add chat context to bookmarked message
+          bookmarkedMessages.push({
+            ...message,
+            chatId: chat.id, // Add chat ID to be able to navigate to the chat
+            chatTitle: chat.title, // Add chat title for display
+          });
+        }
+      });
+    });
+    
+    return bookmarkedMessages;
+  };
+
   const value = {
     chats,
     currentChatId,
@@ -197,10 +233,12 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
     setCurrentChat,
     addMessage,
     bookmarkChat,
+    bookmarkMessage,
     deleteChat,
     renameChat,
     toggleDarkMode,
     getCurrentChat,
+    getBookmarkedMessages,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

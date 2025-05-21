@@ -1,10 +1,10 @@
 
 import React from "react";
-import { Copy } from "lucide-react";
+import { Copy, Bookmark, BookmarkCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { ChatMessage } from "@/context/ChatContext";
+import { ChatMessage, useChat } from "@/context/ChatContext";
 import ReactMarkdown from "react-markdown";
 
 interface MessageProps {
@@ -13,11 +13,22 @@ interface MessageProps {
 
 export const Message: React.FC<MessageProps> = ({ message }) => {
   const { toast } = useToast();
+  const { bookmarkMessage } = useChat();
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
       title: "Copied to clipboard",
+      duration: 2000,
+    });
+  };
+
+  const handleBookmark = () => {
+    bookmarkMessage(message.id);
+    toast({
+      title: message.bookmarked 
+        ? "Message removed from bookmarks" 
+        : "Message bookmarked",
       duration: 2000,
     });
   };
@@ -107,8 +118,22 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
         </div>
         
         <div className="flex-1">
-          <div className="mb-1 text-xs font-medium">
-            {message.isUser ? "You" : "QueryCraft"}
+          <div className="mb-1 text-xs font-medium flex justify-between items-center">
+            <span>{message.isUser ? "You" : "QueryCraft"}</span>
+            {message.isUser && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 px-2 text-xs -mr-2"
+                onClick={handleBookmark}
+              >
+                {message.bookmarked ? (
+                  <BookmarkCheck className="h-3.5 w-3.5 text-amber-500" />
+                ) : (
+                  <Bookmark className="h-3.5 w-3.5" />
+                )}
+              </Button>
+            )}
           </div>
           
           <div className={`rounded-lg p-4 ${
@@ -130,4 +155,3 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
     </div>
   );
 };
-
