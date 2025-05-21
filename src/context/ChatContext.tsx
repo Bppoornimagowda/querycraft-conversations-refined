@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 export type ChatMessage = {
@@ -8,6 +7,8 @@ export type ChatMessage = {
   timestamp: Date;
   images?: string[];
   bookmarked?: boolean;
+  chatId?: string;  // Added optional chatId property
+  chatTitle?: string;  // Added optional chatTitle property
 };
 
 export type Chat = {
@@ -215,8 +216,8 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
           // Add chat context to bookmarked message
           bookmarkedMessages.push({
             ...message,
-            chatId: chat.id, // Add chat ID to be able to navigate to the chat
-            chatTitle: chat.title, // Add chat title for display
+            chatId: chat.id, // Now this is a valid property
+            chatTitle: chat.title, // Now this is a valid property
           });
         }
       });
