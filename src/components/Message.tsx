@@ -27,11 +27,13 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
       <div className="markdown-content">
         <ReactMarkdown
           components={{
-            code: ({ node, inline, className, children, ...props }) => {
+            code: ({ node, className, children, ...props }) => {
+              // Check if this is an inline code block
+              const isInline = !className;
               const match = /language-(\w+)/.exec(className || "");
               const codeContent = String(children).replace(/\n$/, "");
               
-              if (!inline && match) {
+              if (!isInline && match) {
                 return (
                   <div className="relative">
                     <div className="flex justify-between items-center bg-muted/70 p-2 text-xs rounded-t-md">
@@ -128,3 +130,4 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
     </div>
   );
 };
+
